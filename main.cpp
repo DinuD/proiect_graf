@@ -155,8 +155,30 @@ void parteneri_pers() {
         cout << "Nu are" << endl;
 }
 
+void max_frati() {
+    system("cls");
+    int m = 0, x = 0;
+    char *p;
+    for(int i = 1; i <= n; i++)
+        for(int j = 1; j <= n; j++) {
+            x = 0;
+            if(i!=j)
+                if(a[i][j].leg == 1 && a[i][j].frate == 1) 
+                    x++;
+                if(x > m) {
+                    m = x;
+                    p = nume[i];
+                }
+        }
+    if(!m)
+        cout << "Nimeni nu are frati";
+    else
+        cout << p << " are cei mai multi frati";    
+}
+
 int main() {
     matrice();
+    vdg(d);
     int t;
     do {
         system("cls");
@@ -165,6 +187,7 @@ int main() {
         cout << "2. Vezi copiii unei persoane" << endl;
         cout << "3. Vezi fratii unei persoane" << endl;
         cout << "4. Vezi partenerii unei persoane" << endl;
+        cout << "5. Cine are cei mai multi frati" << endl;
         cout << "Optiunea dorita: ";
         cin >> t;
         switch (t)
@@ -183,6 +206,10 @@ int main() {
 
             case 4:
                 parteneri_pers();
+                _getch();break;
+
+            case 5:
+                max_frati();
                 _getch();break;
 
             case 0:
