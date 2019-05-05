@@ -58,8 +58,15 @@ int cautare_pers(char* pers) {
     return 0;
 }
 
+int cautare_id_in_vect(int id, int v[5]) {
+    for(int i = 0; i < 5; i++)
+        if(v[i] == id)
+            return 1;
+    return 0;
+}
+
 // FUNCTII SPECIFICE
-void info_pers() {
+void parinti_pers() {
     char p[31];
     system("cls");
     cout << "Introdu numele persoanei pe care o cauti" << endl;
@@ -74,16 +81,78 @@ void info_pers() {
                 if(x < 2) {
                     cout << nume[i] << ", ";
                     x++;
-                } else cout << nume[i] << endl << "\nAlte rude:\n";
-            else {
-                cout << nume[i] << " ";
-                if(a[id][i].frate == 0)
-                    cout << "- copil\n";
-                else
-                    cout << "- frate\n";
-            }
-
+                } else cout << nume[i] << endl;
     }
+    if(x!=3)
+        cout << "Persoana este din prima generatie a familiei";
+}
+
+void copii_pers() {
+    char p[31];
+    system("cls");
+    cout << "Introdu numele persoanei pe care o cauti" << endl;
+    cin >> p;
+    int id = cautare_pers(p);
+    int x = 0;
+    system("cls");
+    cout << "Copii:\n";
+    for(int i = 1; i <= n; i++) {
+        if(a[id][i].leg == 1 && i > id)
+            if(a[id][i].frate == 0) {
+                x++;
+                cout << nume[i] << endl;
+            }
+    }
+    if(!x)
+        cout << "Nu are" << endl;
+}
+
+void frati_pers() {
+    char p[31];
+    system("cls");
+    cout << "Introdu numele persoanei pe care o cauti" << endl;
+    cin >> p;
+    int id = cautare_pers(p);
+    int x = 0;
+    system("cls");
+    cout << "Frati:\n";
+    for(int i = 1; i <= n; i++) {
+        if(a[id][i].leg == 1)
+            if(a[id][i].frate == 1) {
+                x++;
+                cout << nume[i] << endl;
+            }
+    }
+    if(!x)
+        cout << "Nu are" << endl;
+}
+
+void parteneri_pers() {
+    char p[31];
+    system("cls");
+    cout << "Introdu numele persoanei pe care o cauti" << endl;
+    cin >> p;
+    int id = cautare_pers(p);
+    int x = 0, z[5];
+    system("cls");
+    cout << "Parteneri:\n";
+    for(int i = id+1; i <= n; i++) {
+        if(a[id][i].leg == 1)
+            if(a[id][i].frate == 0) {
+                for(int j = 1; j < i; j++)
+                    if(a[i][j].leg == 1 && i>j && id!=j) {
+                        if(a[i][j].frate == 0)
+                            if(i == id+1 || i == j+1)
+                                if(cautare_id_in_vect(j, z)==0) {
+                                    z[x] = j;
+                                    x++;
+                                    cout << nume[j] << endl;
+                                }
+                    }
+            }
+    }
+    if(!x)
+        cout << "Nu are" << endl;
 }
 
 int main() {
@@ -92,13 +161,28 @@ int main() {
     do {
         system("cls");
         cout << "Selectati optiunea dorita: " << endl;
-        cout << "1. Informatii persoana" << endl;
+        cout << "1. Vezi parintii unei persoane" << endl;
+        cout << "2. Vezi copiii unei persoane" << endl;
+        cout << "3. Vezi fratii unei persoane" << endl;
+        cout << "4. Vezi partenerii unei persoane" << endl;
         cout << "Optiunea dorita: ";
         cin >> t;
         switch (t)
         {
             case 1:
-                info_pers();
+                parinti_pers();
+                _getch();break;
+
+            case 2:
+                copii_pers();
+                _getch();break;
+
+            case 3:
+                frati_pers();
+                _getch();break;
+
+            case 4:
+                parteneri_pers();
                 _getch();break;
 
             case 0:
