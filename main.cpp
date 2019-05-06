@@ -51,6 +51,7 @@ int lant(int z[15], int p) {
 }
 
 // HELPER FUNCTIONS
+
 int cautare_pers(char* pers) {
     for(int i = 1; i <= n; i++)
         if(strcmp(pers, nume[i])==0)
@@ -163,17 +164,35 @@ void max_frati() {
         for(int j = 1; j <= n; j++) {
             x = 0;
             if(i!=j)
-                if(a[i][j].leg == 1 && a[i][j].frate == 1) 
+                if(a[i][j].leg == 1 && a[i][j].frate == 1)
                     x++;
-                if(x > m) {
-                    m = x;
-                    p = nume[i];
-                }
+            if(x > m) {
+                m = x;
+                p = nume[i];
+            }
         }
     if(!m)
         cout << "Nimeni nu are frati";
     else
-        cout << p << " are cei mai multi frati";    
+        cout << p << "are cei mai multi frati";
+}
+
+void max_copii() {
+    system("cls");
+    int m = 0, x = 0;
+    char *p;
+    for(int i = 1; i <= n; i++) {
+        x = 0;
+        for (int j = i+1; j <= n; j++) {
+            if (a[i][j].leg == 1)
+                x++;
+            if (x > m) {
+                m = x;
+                p = nume[i];
+            }
+        }
+    }
+    cout << p << "are cei mai multi copii";
 }
 
 int main() {
@@ -188,6 +207,7 @@ int main() {
         cout << "3. Vezi fratii unei persoane" << endl;
         cout << "4. Vezi partenerii unei persoane" << endl;
         cout << "5. Cine are cei mai multi frati" << endl;
+        cout << "6. Cine are cei mai multi copii" << endl;
         cout << "Optiunea dorita: ";
         cin >> t;
         switch (t)
@@ -212,9 +232,13 @@ int main() {
                 max_frati();
                 _getch();break;
 
+            case 6:
+                max_copii();
+                _getch();break;
+
             case 0:
                 return 0;
-        
+
             default: {
                 cout << "Optiune inexistenta. Incearca din nou\n";
                 Sleep(1000);
