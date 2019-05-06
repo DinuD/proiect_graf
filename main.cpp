@@ -174,7 +174,7 @@ void max_frati() {
     if(!m)
         cout << "Nimeni nu are frati";
     else
-        cout << p << "are cei mai multi frati";
+        cout << p << " are cei mai multi frati";
 }
 
 void max_copii() {
@@ -192,7 +192,7 @@ void max_copii() {
             }
         }
     }
-    cout << p << "are cei mai multi copii";
+    cout << p << " are cei mai multi copii";
 }
 
 int main() {
