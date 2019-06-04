@@ -13,6 +13,22 @@ struct relatie {
 int n, m, d[31];
 char nume[31][31];
 
+int t[101], n;
+char nume[101][31];
+
+void citire() {
+    ifstream fin("graf.in");
+    int rad, x, y;
+    fin >> n >> rad;
+    t[rad] = 0;
+    for(int i = 1; i < n; i++) {
+        fin >> x >> y;
+        t[y] = x;
+    }
+    for(int i = 1; i <= n; i++)
+        fin >> nume[i];
+}
+
 // FUNCTII PRINCIPALE
 
 void matrice() {
