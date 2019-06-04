@@ -2,255 +2,192 @@
 #include <fstream>
 #include <afxres.h>
 #include <conio.h>
+#include <string.h>
 
 using namespace std;
+ifstream fin("graf.in");
 
-struct relatie {
-    int leg;
-    int frate;
-} a[31][31];
+struct nod {
+    int id;
+    int varsta;
+    char nume[31];
+    char nr_telefon[11];
+    char ocupatie[31];
+    nod* st;
+    nod* dr;
+    nod* parinte = NULL;
+} *rad;
 
-int n, m, d[31];
-char nume[31][31];
+nod* creare() {
+    int x;
+    nod* r;
+    fin >> x;
+    if(x) {
+        r = new nod;
+        r->id = x;
+        fin >> r->varsta >> r->nume >> r->nr_telefon >> r->ocupatie;
+        r->st = creare();
+        r->dr = creare();
+        // r->dr->parinte = r;
+        // r->st->parinte = r;
+        return r;
+    } else return NULL;
+}
 
-int t[101], n;
-char nume[101][31];
+void afisare_pers(nod* x) {
+    cout << "ID: " << x->id << endl;
+    cout << "Nume: " << x->nume << endl;
+    cout << "Varsta: " << x->varsta << endl;
+    cout << "Nr de telefon: " << x->nr_telefon << endl;
+    cout << "Ocupatie: " << x->ocupatie << endl;
+}
 
-void citire() {
-    ifstream fin("graf.in");
-    int rad, x, y;
-    fin >> n >> rad;
-    t[rad] = 0;
-    for(int i = 1; i < n; i++) {
-        fin >> x >> y;
-        t[y] = x;
+void parcurgere(nod* r) {
+    if(r) {
+        afisare_pers(r);
+        parcurgere(r->st);
+        parcurgere(r->dr);
     }
-    for(int i = 1; i <= n; i++)
-        fin >> nume[i];
 }
 
-// FUNCTII PRINCIPALE
-
-void matrice() {
-    int x, y, z;
-    ifstream fin("graf.in");
-    fin >> n >> m;
-    for(int i = 1; i <= m; i++) {
-        fin >> x >> y >> z;
-        a[x][y].leg = 1;
-        a[x][y].frate = z;
-        a[y][x] = a[x][y];
+void parcurgere_srd(nod* r) {
+    if(r) {
+        parcurgere_srd(r->st);
+        afisare_pers(r);
+        parcurgere_srd(r->dr);
     }
-    for(int i = 1; i <= m; i++)
-        fin >> nume[i];
-    fin.close();
 }
 
-int grad(int vf) {
-    int gr = 0;
-    for(int i = 1; i <= n; i++)
-        if(a[vf][i].leg == 1)
-            gr++;
-    return gr;
-}
-
-void vdg(int d[30]) {
-    for(int i = 1; i <= n; i++)
-        d[i] = grad(i);
-}
-
-int lant(int z[15], int p) {
-    for(int i = 1; i < p; i++)
-        if(a[z[i]][z[i+1]].leg == 0)
-            return 0;
-    return 1;
-}
-
-// HELPER FUNCTIONS
-
-int cautare_pers(char* pers) {
-    for(int i = 1; i <= n; i++)
-        if(strcmp(pers, nume[i])==0)
-            return i;
-    return 0;
-}
-
-int cautare_id_in_vect(int id, int v[5]) {
-    for(int i = 0; i < 5; i++)
-        if(v[i] == id)
-            return 1;
-    return 0;
-}
-
-// FUNCTII SPECIFICE
-void parinti_pers() {
-    char p[31];
-    system("cls");
-    cout << "Introdu numele persoanei pe care o cauti" << endl;
-    cin >> p;
-    int id = cautare_pers(p);
-    int x = 1;
-    system("cls");
-    cout << "Parinti: ";
-    for(int i = 1; i <= n; i++) {
-        if(a[id][i].leg == 1)
-            if(i < id)
-                if(x < 2) {
-                    cout << nume[i] << ", ";
-                    x++;
-                } else cout << nume[i] << endl;
+void parcurgere_sdr(nod* r) {
+    if(r) {
+        parcurgere_sdr(r->st);
+        parcurgere_sdr(r->dr);
+        afisare_pers(r);
     }
-    if(x!=3)
-        cout << "Persoana este din prima generatie a familiei";
 }
 
-void copii_pers() {
-    char p[31];
-    system("cls");
-    cout << "Introdu numele persoanei pe care o cauti" << endl;
-    cin >> p;
-    int id = cautare_pers(p);
-    int x = 0;
-    system("cls");
-    cout << "Copii:\n";
-    for(int i = 1; i <= n; i++) {
-        if(a[id][i].leg == 1 && i > id)
-            if(a[id][i].frate == 0) {
-                x++;
-                cout << nume[i] << endl;
-            }
+nod* cautare_nume(nod* r, char* nume) {
+    if(r) {
+        if(strcmp(r->nume, nume)==0)
+            return r;
+        else if(cautare_nume(r->st, nume))
+            return cautare_nume(r->st, nume);
+        else return cautare_nume(r->dr, nume);
     }
-    if(!x)
-        cout << "Nu are" << endl;
+    return NULL;
 }
 
-void frati_pers() {
-    char p[31];
-    system("cls");
-    cout << "Introdu numele persoanei pe care o cauti" << endl;
-    cin >> p;
-    int id = cautare_pers(p);
-    int x = 0;
-    system("cls");
-    cout << "Frati:\n";
-    for(int i = 1; i <= n; i++) {
-        if(a[id][i].leg == 1)
-            if(a[id][i].frate == 1) {
-                x++;
-                cout << nume[i] << endl;
-            }
+nod* cautare_tel(nod* r, char* nr_tel) {
+    if(r) {
+        if(strcmp(r->nr_telefon, nr_tel)==0)
+            return r;
+        else if(cautare_tel(r->st, nr_tel))
+            return cautare_tel(r->st, nr_tel);
+        else return cautare_tel(r->dr, nr_tel);
     }
-    if(!x)
-        cout << "Nu are" << endl;
+    return NULL;
 }
 
-void parteneri_pers() {
-    char p[31];
-    system("cls");
-    cout << "Introdu numele persoanei pe care o cauti" << endl;
-    cin >> p;
-    int id = cautare_pers(p);
-    int x = 0, z[5];
-    system("cls");
-    cout << "Parteneri:\n";
-    for(int i = id+1; i <= n; i++) {
-        if(a[id][i].leg == 1)
-            if(a[id][i].frate == 0) {
-                for(int j = 1; j < i; j++)
-                    if(a[i][j].leg == 1 && i>j && id!=j) {
-                        if(a[i][j].frate == 0)
-                            if(i == id+1 || i == j+1)
-                                if(cautare_id_in_vect(j, z)==0) {
-                                    z[x] = j;
-                                    x++;
-                                    cout << nume[j] << endl;
-                                }
-                    }
-            }
-    }
-    if(!x)
-        cout << "Nu are" << endl;
-}
-
-void max_frati() {
-    system("cls");
-    int m = 0, x = 0;
-    char *p;
-    for(int i = 1; i <= n; i++)
-        for(int j = 1; j <= n; j++) {
-            x = 0;
-            if(i!=j)
-                if(a[i][j].leg == 1 && a[i][j].frate == 1)
-                    x++;
-            if(x > m) {
-                m = x;
-                p = nume[i];
-            }
-        }
-    if(!m)
-        cout << "Nimeni nu are frati";
-    else
-        cout << p << " are cei mai multi frati";
-}
-
-void max_copii() {
-    system("cls");
-    int m = 0, x = 0;
-    char *p;
-    for(int i = 1; i <= n; i++) {
-        x = 0;
-        for (int j = i+1; j <= n; j++) {
-            if (a[i][j].leg == 1)
-                x++;
-            if (x > m) {
-                m = x;
-                p = nume[i];
-            }
+void lista_pers(nod* x) {
+    if(x == rad)
+        cout << "ID: " << x->id << " " << x->nume << endl;
+    if(x->st != NULL) {
+        cout << "ID: " << x->st->id << " " << x->st->nume << endl;
+        if(x->st->st!=NULL || x->st->dr!=NULL) {
+            cout << "Copii:" << endl;
+            lista_pers(x->st);
         }
     }
-    cout << p << " are cei mai multi copii";
+    if(x->dr != NULL) {
+        cout << "ID: " << x->dr->id << " " << x->dr->nume << endl;
+        if(x->dr->st!=NULL || x->dr->dr!=NULL) {
+            cout << "Copii:" << endl;
+            lista_pers(x->dr);
+        }
+    }
+    if(x->st == NULL || x->dr == NULL)
+        cout << endl;
+}
+
+void ocupatii(nod* r, char* oc) {
+    if(r) {
+        if(strcmp(r->ocupatie, oc)==0)
+            afisare_pers(r);
+        ocupatii(r->st, oc);
+        ocupatii(r->dr, oc);
+    }
 }
 
 int main() {
-    matrice();
-    vdg(d);
+    rad = creare();
+    // parcurgere(rad);
+    // cin.get();
     int t;
     do {
         system("cls");
         cout << "Selectati optiunea dorita: " << endl;
-        cout << "1. Vezi parintii unei persoane" << endl;
-        cout << "2. Vezi copiii unei persoane" << endl;
-        cout << "3. Vezi fratii unei persoane" << endl;
-        cout << "4. Vezi partenerii unei persoane" << endl;
-        cout << "5. Cine are cei mai multi frati" << endl;
-        cout << "6. Cine are cei mai multi copii" << endl;
+        cout << "1. Lista persoane" << endl;
+        cout << "2. Detalii persoana" << endl;
+        cout << "3. Cauta persoana dupa nr de telefon" << endl;
+        cout << "4. Afiseaza persoanele cu o anumita ocupatie" << endl;
+        cout << "5. Parcurgerea RSD" << endl;
+        cout << "6. Parcurgerea SRD" << endl;
+        cout << "7. Parcurgerea SDR" << endl;
         cout << "Optiunea dorita: ";
         cin >> t;
         switch (t)
         {
-            case 1:
-                parinti_pers();
-                _getch();break;
+            case 1: {
+                system("cls");
+                lista_pers(rad);
+            } _getch();break;
 
-            case 2:
-                copii_pers();
-                _getch();break;
+            case 2: {
+                system("cls");
+                cout << "Introdu numele persoanei cautate:" << endl;
+                char nume[31];
+                cin >> nume;
+                nod* x = cautare_nume(rad, nume);
+                if(x != NULL) {
+                    system("cls");
+                    afisare_pers(x);
+                }
+            } _getch(); break;
 
-            case 3:
-                frati_pers();
-                _getch();break;
+            case 3: {
+                system("cls");
+                cout << "Introdu numarul de telefon cautat:" << endl;
+                char nr_tel[31];
+                cin >> nr_tel;
+                nod* x = cautare_tel(rad, nr_tel);
+                if(x != NULL) {
+                    system("cls");
+                    afisare_pers(x);
+                }
+            } _getch(); break;
 
-            case 4:
-                parteneri_pers();
-                _getch();break;
+            case 4: {
+                system("cls");
+                cout << "Introdu ocupatia cautata:" << endl;
+                char oc[31];
+                cin >> oc;
+                ocupatii(rad, oc);
+            } _getch(); break;
 
-            case 5:
-                max_frati();
-                _getch();break;
+            case 5: {
+                system("cls");
+                parcurgere(rad);
+            } _getch(); break;
 
-            case 6:
-                max_copii();
-                _getch();break;
+            case 6: {
+                system("cls");
+                parcurgere_srd(rad);
+            } _getch(); break;
+
+            case 7: {
+                system("cls");
+                parcurgere_sdr(rad);
+            } _getch(); break;
 
             case 0:
                 return 0;
