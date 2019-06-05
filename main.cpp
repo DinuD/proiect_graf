@@ -6,6 +6,7 @@
 
 using namespace std;
 ifstream fin("graf.in");
+int n, a[30][30], viz_a[30], nrc=1, viz_l[30];
 
 struct nod {
     int id;
@@ -32,6 +33,13 @@ nod* creare() {
         // r->st->parinte = r;
         return r;
     } else return NULL;
+}
+
+void matrice() {
+    fin >> n;
+    for(int i = 1; i <= n; i++)
+        for(int j = 1; j <= n; j++)
+            fin >> a[i][j];
 }
 
 void afisare_pers(nod* x) {
@@ -77,6 +85,17 @@ nod* cautare_nume(nod* r, char* nume) {
     return NULL;
 }
 
+nod* cautare_id(nod* r, int id) {
+    if(r) {
+        if(r->id == id)
+            return r;
+        else if(cautare_id(r->st, id))
+            return cautare_id(r->st, id);
+        else return cautare_id(r->dr, id);
+    }
+    return NULL;
+}
+
 nod* cautare_tel(nod* r, char* nr_tel) {
     if(r) {
         if(strcmp(r->nr_telefon, nr_tel)==0)
@@ -118,8 +137,70 @@ void ocupatii(nod* r, char* oc) {
     }
 }
 
+void contact(nod* r) {
+    nod* p;
+    system("cls");
+    cout << r->nume << " poate contacta direct urmatoarele persoane:\n";
+    for(int i = 1; i <= n; i++)
+        if(a[r->id][i] == 1) {
+            p = cautare_id(rad, i);
+            cout << p->nume << " " << p->nr_telefon << endl;
+        }
+}
+
+void adancime(int vf, int afisare) {
+    viz_a[vf] = nrc;
+    if(afisare)
+        cout << vf << " ";
+    for(int i = 1; i <= n; i++)
+        if(a[vf][i] == 1 && viz_a[i]==0)
+            adancime(i, afisare);
+}
+
+void comp_conexe() {
+    system("cls");
+    nod* x;
+    adancime(1, 0);
+    for(int i = 1; i <= n; i++)
+        if(viz_a[i] == 0) {
+            nrc++;
+            adancime(i, 0);
+        }
+    for(int i = 1; i <= nrc; i++) {
+        cout << "Cercul/Componenta " << i << ":\n";
+        for(int j = 1; j <= n; j++)
+            if(viz_a[j] == i) {
+                x = cautare_id(rad, j);
+                cout << x->nume << " " << x->nr_telefon << endl;
+            }
+        cout << endl;
+    }
+}
+
+void latime(int vf) {
+    int c[30], ps, pi;
+    viz_l[vf] = 1;
+    cout << vf << " ";
+    c[1] = vf;
+    pi = 1;
+    ps = 1;
+    while(ps <= pi) {
+        for(int i = 1; i <= n; i++)
+            if(a[vf][i] == 1 && viz_l[i]==0) {
+                pi++;
+                c[pi] = i;
+                viz_l[i] = 1;
+                cout << i << " ";
+            }
+        ps++;
+        vf = c[ps];
+    }
+}
+
 int main() {
     rad = creare();
+    matrice();
+    fin.close();
     // parcurgere(rad);
     // cin.get();
     int t;
@@ -133,6 +214,11 @@ int main() {
         cout << "5. Parcurgerea RSD" << endl;
         cout << "6. Parcurgerea SRD" << endl;
         cout << "7. Parcurgerea SDR" << endl;
+        cout << "-------------------------------------------------------" << endl;
+        cout << "8. Pe cine poate contacta direct persoana cautata" << endl;
+        cout << "9. Afiseaza cercurile de prietenie (componentele conexe)" << endl;
+        cout << "10. Parcurgerea grafului in adancime" << endl;
+        cout << "11. Parcurgerea grafului in latime" << endl;
         cout << "Optiunea dorita: ";
         cin >> t;
         switch (t)
@@ -151,7 +237,8 @@ int main() {
                 if(x != NULL) {
                     system("cls");
                     afisare_pers(x);
-                }
+                } else
+                    cout << "Nu am gasit persoana";
             } _getch(); break;
 
             case 3: {
@@ -163,7 +250,8 @@ int main() {
                 if(x != NULL) {
                     system("cls");
                     afisare_pers(x);
-                }
+                } else
+                    cout << "Nu am gasit numarul";
             } _getch(); break;
 
             case 4: {
@@ -187,6 +275,42 @@ int main() {
             case 7: {
                 system("cls");
                 parcurgere_sdr(rad);
+            } _getch(); break;
+
+            case 8: {
+                system("cls");
+                cout << "Introdu numele persoanei cautate:" << endl;
+                char nume[31];
+                cin >> nume;
+                nod* x = cautare_nume(rad, nume);
+                if(x!=NULL)
+                    contact(x);
+                else
+                    cout << "Nu am gasit persoana";
+            } _getch(); break;
+
+            case 9:
+                comp_conexe();
+                _getch(); break;
+
+            case 10: {
+                system("cls");
+                cout << "Introdu numele persoanei de la care va porni parcurgerea" << endl;
+                char nume[31];
+                cin >> nume;
+                nod* x = cautare_nume(rad, nume);
+                adancime(x->id, 1);
+                cout << endl;
+            } _getch(); break;
+
+            case 11: {
+                system("cls");
+                cout << "Introdu numele persoanei de la care va porni parcurgerea" << endl;
+                char nume[31];
+                cin >> nume;
+                nod* x = cautare_nume(rad, nume);
+                latime(x->id);
+                cout << endl;
             } _getch(); break;
 
             case 0:
